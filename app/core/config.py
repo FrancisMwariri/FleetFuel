@@ -1,0 +1,58 @@
+from decimal import Decimal
+from functools import lru_cache
+from typing import Literal
+
+from pydantic import model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="FLEETFUEL_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    app_name: str = "FleetFuel API"
+    environment: Literal["development", "test", "production"] = "development"
+    api_v1_prefix: str = "/api/v1"
+    cors_origins: list[str] = []
+    database_url: str | None = None
+    jwt_secret: str | None = None
+    attachment_directory: str = "private_uploads"
+    max_attachment_bytes: int = 5_000_000
+    unusual_spend_multiplier: Decimal = Decimal("2.5")
+    mail_host: str | None = None
+    mail_port: int = 587
+    mail_username: str | None = None
+    mail_password: str | None = None
+    mail_from: str | None = None
+    password_reset_url: str | None = None
+
+    @property
+    def docs_enabled(self) -> bool:
+        return self.environment != "production"
+
+    @model_validator(mode="after")
+    def validate_production_configuration(self) -> "Settings":
+        if "*" in self.cors_origins:
+            raise ValueError("FLEETFUEL_CORS_ORIGINS must not contain a wildcard")
+        if self.environment == "production":
+            if not self.database_url:
+                raise ValueError("FLEETFUEL_DATABASE_URL is required in production")
+            if (
+                not self.jwt_secret
+                or len(self.jwt_secret) < 32
+                or self.jwt_secret.startswith("generate-a-random-value")
+                or "change-me" in self.jwt_secret
+            ):
+                raise ValueError(
+                    "FLEETFUEL_JWT_SECRET must be at least 32 characters in production"
+                )
+        return self
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
