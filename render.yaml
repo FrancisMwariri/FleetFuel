@@ -16,6 +16,8 @@ services:
           property: connectionString
       - key: FLEETFUEL_JWT_SECRET
         generateValue: true
+      - key: FLEETFUEL_CORS_ORIGINS
+        value: '["https://fleetfuel-web.onrender.com"]'
       - key: FLEETFUEL_ATTACHMENT_DIRECTORY
         value: /tmp/fleetfuel-private-uploads
       - key: FLEETFUEL_BOOTSTRAP_ADMIN_EMAIL
@@ -24,6 +26,13 @@ services:
         generateValue: true
       - key: PYTHONUNBUFFERED
         value: "1"
+
+  - type: web
+    name: fleetfuel-web
+    runtime: static
+    rootDir: mobile
+    buildCommand: git clone --depth 1 --branch stable https://github.com/flutter/flutter.git /tmp/flutter && export PATH="/tmp/flutter/bin:$PATH" && flutter config --no-analytics && flutter pub get && flutter build web --release --dart-define=MEDIFUEL_API_BASE_URL=https://fleetfuel-api.onrender.com/api/v1
+    staticPublishPath: build/web
 
 databases:
   - name: fleetfuel-db

@@ -17,6 +17,8 @@ The container startup command runs `alembic upgrade head` before starting the AP
 
 The Render Blueprint bootstraps the first platform administrator using the configured email and a Render-generated password. Retrieve that password from the service's Environment settings and store it securely. Bootstrap is idempotent for the configured account on later restarts; it fails if a different platform administrator already exists.
 
+The Blueprint also builds and hosts the Flutter web client at `https://fleetfuel-web.onrender.com`, configured to call the API at `https://fleetfuel-api.onrender.com/api/v1`. Its origin is the only browser origin allowed by the API CORS policy.
+
 The Render Blueprint uses free plans for a demo. Render free web services have ephemeral filesystems and spin down when idle; free PostgreSQL databases expire after 30 days. Uploaded attachments are stored on the web service filesystem and can be lost at any restart or spin-down. Do not use this configuration for production or real customer data. Upgrade to paid persistent resources and configure durable private attachment storage before production use.
 
 Terminate TLS at a trusted ingress, restrict database network access, configure explicit CORS, set request/body limits and distributed rate limits at the proxy, and add security headers there. The application login limiter is database-backed and keyed on the direct client address plus normalized email. Do not trust arbitrary forwarded headers; configure trusted-proxy behavior and edge throttling deliberately.
