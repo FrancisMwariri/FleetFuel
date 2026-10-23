@@ -46,8 +46,14 @@ def bootstrap_super_admin() -> None:
         raise ValueError("Bootstrap administrator password must be at least 12 characters")
     factory = get_session_factory()
     with factory.begin() as session:
-        if session.scalar(select(User.id).where(User.role == "SUPER_ADMIN").limit(1)) is not None:
-            raise RuntimeError("A platform administrator already exists")
+        existing = session.scalar(
+            select(User).where(User.role == "SUPER_ADMIN").limit(1)
+        )
+        if existing is not None:
+            if existing.email != email:
+                raise RuntimeError("A different platform administrator already exists")
+            print("Platform administrator already exists; bootstrap skipped")
+            return
         session.add(
             User(
                 organization_id=None,

@@ -18,6 +18,10 @@ services:
         generateValue: true
       - key: FLEETFUEL_ATTACHMENT_DIRECTORY
         value: /tmp/fleetfuel-private-uploads
+      - key: FLEETFUEL_BOOTSTRAP_ADMIN_EMAIL
+        value: adminmanager@gmail.com
+      - key: FLEETFUEL_BOOTSTRAP_ADMIN_PASSWORD
+        generateValue: true
       - key: PYTHONUNBUFFERED
         value: "1"
 

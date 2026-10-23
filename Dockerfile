@@ -16,4 +16,4 @@ COPY --chown=fleetfuel:fleetfuel alembic.ini ./alembic.ini
 
 USER fleetfuel
 EXPOSE 10000
-CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+CMD ["sh", "-c", "alembic upgrade head && if [ -n \"$FLEETFUEL_BOOTSTRAP_ADMIN_EMAIL\" ] && [ -n \"$FLEETFUEL_BOOTSTRAP_ADMIN_PASSWORD\" ]; then python -m app.cli bootstrap-super-admin; fi && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
