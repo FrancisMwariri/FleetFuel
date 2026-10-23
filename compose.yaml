@@ -23,6 +23,7 @@ services:
       FLEETFUEL_JWT_SECRET: ${FLEETFUEL_JWT_SECRET:?Set FLEETFUEL_JWT_SECRET in the environment}
       FLEETFUEL_CORS_ORIGINS: '["http://localhost:5000","http://127.0.0.1:5000"]'
       FLEETFUEL_ATTACHMENT_DIRECTORY: /app/private_uploads
+      PORT: "8000"
     ports:
       - "8000:8000"
     volumes:

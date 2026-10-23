@@ -13,7 +13,9 @@ Production settings fail fast without the database URL and signing secret. OpenA
 
 ## Release operations
 
-Run `alembic upgrade head` as a controlled release step before deploying code that depends on new schema. Review generated revisions and take a tested backup first. Do not use metadata `create_all` as a deployed migration strategy.
+The container startup command runs `alembic upgrade head` before starting the API, and `/ready` checks database connectivity. Review generated revisions and take a tested backup before deploying schema changes. Do not use metadata `create_all` as a deployed migration strategy.
+
+The Render Blueprint uses free plans for a demo. Render free web services have ephemeral filesystems and spin down when idle; free PostgreSQL databases expire after 30 days. Uploaded attachments are stored on the web service filesystem and can be lost at any restart or spin-down. Do not use this configuration for production or real customer data. Upgrade to paid persistent resources and configure durable private attachment storage before production use.
 
 Terminate TLS at a trusted ingress, restrict database network access, configure explicit CORS, set request/body limits and distributed rate limits at the proxy, and add security headers there. The application login limiter is database-backed and keyed on the direct client address plus normalized email. Do not trust arbitrary forwarded headers; configure trusted-proxy behavior and edge throttling deliberately.
 

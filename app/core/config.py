@@ -2,7 +2,7 @@ from decimal import Decimal
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -29,6 +29,15 @@ class Settings(BaseSettings):
     mail_password: str | None = None
     mail_from: str | None = None
     password_reset_url: str | None = None
+
+    @field_validator("database_url")
+    @classmethod
+    def use_psycopg_driver(cls, database_url: str | None) -> str | None:
+        if database_url and database_url.startswith("postgres://"):
+            return database_url.replace("postgres://", "postgresql+psycopg://", 1)
+        if database_url and database_url.startswith("postgresql://"):
+            return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return database_url
 
     @property
     def docs_enabled(self) -> bool:

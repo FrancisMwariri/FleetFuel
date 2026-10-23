@@ -6,8 +6,7 @@ services:
     repo: https://github.com/FrancisMwariri/FleetFuel.git
     branch: main
     rootDir: .
-    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
-    healthCheckPath: /health
+    healthCheckPath: /ready
     envVars:
       - key: FLEETFUEL_ENVIRONMENT
         value: production
@@ -17,18 +16,8 @@ services:
           property: connectionString
       - key: FLEETFUEL_JWT_SECRET
         generateValue: true
-      - key: FLEETFUEL_CORS_ORIGINS
-        value: "https://your-frontend.example.com"
       - key: FLEETFUEL_ATTACHMENT_DIRECTORY
         value: /tmp/fleetfuel-private-uploads
-      - key: FLEETFUEL_BOOTSTRAP_ADMIN_EMAIL
-        value: admin@example.com
-      - key: FLEETFUEL_BOOTSTRAP_ADMIN_PASSWORD
-        value: ChangeMe123!
-      - key: FLEETFUEL_BOOTSTRAP_ORGANIZATION
-        value: FleetFuel
-      - key: FLEETFUEL_BOOTSTRAP_CURRENCY
-        value: KES
       - key: PYTHONUNBUFFERED
         value: "1"
 
