@@ -85,6 +85,7 @@ class _HomeShellState extends State<HomeShell> {
           selected: _selected,
           onSelect: (index) => setState(() => _selected = index),
           onLogFuel: _openFuelEntry,
+          canLogFuel: widget.controller.canLogFuel,
         ),
       ),
     );
@@ -144,11 +145,13 @@ class _BottomNav extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     required this.onLogFuel,
+    required this.canLogFuel,
   });
 
   final int selected;
   final ValueChanged<int> onSelect;
   final VoidCallback onLogFuel;
+  final bool canLogFuel;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -174,38 +177,39 @@ class _BottomNav extends StatelessWidget {
               selected: selected == 1,
               onTap: () => onSelect(1),
             ),
-            SizedBox(
-              width: 70,
-              child: Transform.translate(
-                offset: const Offset(0, -7),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox.square(
-                      dimension: 48,
-                      child: FloatingActionButton(
-                        heroTag: 'log-fuel-nav',
-                        elevation: 0,
-                        backgroundColor: MediFuelColors.orange,
-                        foregroundColor: Colors.white,
-                        tooltip: 'Log fuel',
-                        onPressed: onLogFuel,
-                        child: const Icon(Icons.add, size: 27),
+            if (canLogFuel)
+              SizedBox(
+                width: 70,
+                child: Transform.translate(
+                  offset: const Offset(0, -7),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox.square(
+                        dimension: 48,
+                        child: FloatingActionButton(
+                          heroTag: 'log-fuel-nav',
+                          elevation: 0,
+                          backgroundColor: MediFuelColors.orange,
+                          foregroundColor: Colors.white,
+                          tooltip: 'Log fuel',
+                          onPressed: onLogFuel,
+                          child: const Icon(Icons.add, size: 27),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      'Log fuel',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: MediFuelColors.orange,
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Log fuel',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: MediFuelColors.orange,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             _NavItem(
               icon: Icons.bar_chart_outlined,
               active: Icons.bar_chart,

@@ -188,16 +188,17 @@ class DashboardScreen extends StatelessWidget {
                     onOpenPurchase: onOpenPurchase,
                   ),
                 const SizedBox(height: 18),
-                FilledButton.icon(
-                  onPressed: onLogFuel,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Log fuel entry'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: MediFuelColors.orange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
+                if (controller.canLogFuel)
+                  FilledButton.icon(
+                    onPressed: onLogFuel,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Log fuel entry'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: MediFuelColors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

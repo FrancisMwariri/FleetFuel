@@ -31,6 +31,9 @@ class AppController extends ChangeNotifier {
   bool online = true;
   bool initialized = false;
 
+  bool get canLogFuel =>
+      const {'ORG_ADMIN', 'FLEET_MANAGER', 'DRIVER'}.contains(user?.role);
+
   Future<void> initialize() async {
     await store.initialize();
     pending = await store.pendingEntries();
@@ -39,7 +42,10 @@ class AppController extends ChangeNotifier {
       api.token = storedToken;
       try {
         user = AppUser.fromJson(await api.currentUser());
-        await _secureStorage.write(key: _savedUserKey, value: jsonEncode(user!.toJson()));
+        await _secureStorage.write(
+          key: _savedUserKey,
+          value: jsonEncode(user!.toJson()),
+        );
         await _loadRemoteData();
       } on ApiException catch (exception) {
         if (exception.statusCode == 401) {
@@ -66,7 +72,11 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> login(String email, String password, {bool remember = true}) async {
+  Future<void> login(
+    String email,
+    String password, {
+    bool remember = true,
+  }) async {
     busy = true;
     error = null;
     notifyListeners();
@@ -79,7 +89,12 @@ class AppController extends ChangeNotifier {
         await _secureStorage.delete(key: 'access_token');
       }
       user = AppUser.fromJson(await api.currentUser());
-      if (remember) await _secureStorage.write(key: _savedUserKey, value: jsonEncode(user!.toJson()));
+      if (remember) {
+        await _secureStorage.write(
+          key: _savedUserKey,
+          value: jsonEncode(user!.toJson()),
+        );
+      }
       await _loadRemoteData();
     } on ApiException catch (exception) {
       error = exception.message;
@@ -117,7 +132,8 @@ class AppController extends ChangeNotifier {
     }
   }
 
-  Future<void> requestPasswordReset(String email) => api.requestPasswordReset(email);
+  Future<void> requestPasswordReset(String email) =>
+      api.requestPasswordReset(email);
 
   Future<void> logout() async {
     try {
@@ -158,7 +174,12 @@ class AppController extends ChangeNotifier {
     required List<Map<String, String>> attachments,
   }) async {
     if (user?.organizationId == null) {
-      throw const ApiException('This account has no fleet organization.');
+      throw const ApiException(
+        'This account is not linked to a fleet organization.',
+      );
+    }
+    if (!canLogFuel) {
+      throw const ApiException('This account cannot submit fuel entries.');
     }
     final entry = PendingFuelEntry(
       localId: _uuid.v4(),
@@ -170,7 +191,9 @@ class AppController extends ChangeNotifier {
         'litres_purchased': litres,
         'price_per_litre': pricePerLitre,
         'currency': currency,
-        'station_name': station?.trim().isEmpty == true ? null : station?.trim(),
+        'station_name': station?.trim().isEmpty == true
+            ? null
+            : station?.trim(),
         'purchased_at': purchasedAt.toUtc().toIso8601String(),
         'source': 'OFFLINE',
       },
@@ -192,14 +215,22 @@ class AppController extends ChangeNotifier {
       final entries = await store.pendingEntries();
       for (var start = 0; start < entries.length; start += 50) {
         final batch = entries.skip(start).take(50).toList();
-        final results = await api.syncFuelRecords(batch.map((entry) => entry.record).toList());
-        for (var index = 0; index < batch.length && index < results.length; index++) {
+        final results = await api.syncFuelRecords(
+          batch.map((entry) => entry.record).toList(),
+        );
+        for (
+          var index = 0;
+          index < batch.length && index < results.length;
+          index++
+        ) {
           final entry = batch[index];
           final result = results[index];
           final status = result['status'];
           if (status != 'accepted' && status != 'already_accepted') {
             await store.updatePending(
-              entry.withError(result['error']?.toString() ?? 'Could not sync yet.'),
+              entry.withError(
+                result['error']?.toString() ?? 'Could not sync yet.',
+              ),
             );
             continue;
           }
@@ -237,21 +268,41 @@ class AppController extends ChangeNotifier {
   Future<void> _loadRemoteData() async {
     final currentUser = user;
     final organizationId = currentUser?.organizationId;
-    if (currentUser == null || organizationId == null) return;
+    if (currentUser == null) return;
+    if (organizationId == null) {
+      error = currentUser.role == 'SUPER_ADMIN'
+          ? 'This platform administrator account is not linked to a fleet. Sign in with an invited fleet account to view fleet data.'
+          : 'This account is not linked to a fleet organization.';
+      return;
+    }
+    final isDriver = currentUser.role == 'DRIVER';
     final results = await Future.wait<Object>([
-      api.dashboard(),
+      if (isDriver) Future.value(<String, dynamic>{}) else api.dashboard(),
       api.vehicles(),
       api.fuelRecords(),
-      api.alerts(),
+      if (isDriver) Future.value(<Map<String, dynamic>>[]) else api.alerts(),
       api.organization(organizationId),
     ]);
-    summary = FleetSummary.fromJson(results[0] as Map<String, dynamic>);
     final vehicleJson = results[1] as List<Map<String, dynamic>>;
     final purchaseJson = results[2] as List<Map<String, dynamic>>;
     purchases = purchaseJson.map(FuelPurchase.fromJson).toList();
-    vehicles = vehicleJson.map((item) => FleetVehicle.fromJson(item).withHistory(purchases)).toList();
+    vehicles = vehicleJson
+        .map((item) => FleetVehicle.fromJson(item).withHistory(purchases))
+        .toList();
+    summary = isDriver
+        ? FleetSummary.forDriver(
+            vehicles: vehicles,
+            purchases: purchases,
+            currency:
+                (results[4] as Map<String, dynamic>)['default_currency']
+                    as String? ??
+                'USD',
+          )
+        : FleetSummary.fromJson(results[0] as Map<String, dynamic>);
     openAlerts = results[3] as List<Map<String, dynamic>>;
-    currency = (results[4] as Map<String, dynamic>)['default_currency'] as String? ?? 'USD';
+    currency =
+        (results[4] as Map<String, dynamic>)['default_currency'] as String? ??
+        'USD';
     await store.cacheVehicles(vehicleJson);
     await store.cachePurchases(purchaseJson);
     pending = await store.pendingEntries();
@@ -260,7 +311,9 @@ class AppController extends ChangeNotifier {
   Future<void> _loadCachedData() async {
     final vehicleRows = await store.cachedVehicles();
     purchases = await store.cachedPurchases();
-    vehicles = vehicleRows.map((vehicle) => vehicle.withHistory(purchases)).toList();
+    vehicles = vehicleRows
+        .map((vehicle) => vehicle.withHistory(purchases))
+        .toList();
     pending = await store.pendingEntries();
   }
 
@@ -273,6 +326,8 @@ class AppController extends ChangeNotifier {
 
   Future<void> _restoreSavedUser() async {
     final saved = await _secureStorage.read(key: _savedUserKey);
-    if (saved != null) user = AppUser.fromJson(jsonDecode(saved) as Map<String, dynamic>);
+    if (saved != null) {
+      user = AppUser.fromJson(jsonDecode(saved) as Map<String, dynamic>);
+    }
   }
 }

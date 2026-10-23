@@ -167,6 +167,46 @@ class FleetSummary {
             ?.toInt() ??
         0,
   );
+
+  factory FleetSummary.forDriver({
+    required List<FleetVehicle> vehicles,
+    required List<FuelPurchase> purchases,
+    required String currency,
+  }) {
+    final purchasesByVehicle = <String, List<FuelPurchase>>{};
+    for (final purchase in purchases) {
+      purchasesByVehicle
+          .putIfAbsent(purchase.vehicleId, () => [])
+          .add(purchase);
+    }
+    var distance = 0;
+    for (final records in purchasesByVehicle.values) {
+      records.sort((a, b) => a.purchasedAt.compareTo(b.purchasedAt));
+      for (var index = 1; index < records.length; index++) {
+        final interval = records[index].odometer - records[index - 1].odometer;
+        if (interval >= 0) {
+          distance += interval;
+        }
+      }
+    }
+    return FleetSummary(
+      vehicleCount: vehicles.length,
+      activeVehicleCount: vehicles
+          .where((vehicle) => vehicle.status == 'ACTIVE')
+          .length,
+      purchaseCount: purchases.length,
+      totalAmount: purchases.fold(
+        0,
+        (total, purchase) => total + purchase.total,
+      ),
+      totalLitres: purchases.fold(
+        0,
+        (total, purchase) => total + purchase.litres,
+      ),
+      currency: currency,
+      distance: distance,
+    );
+  }
 }
 
 class PendingFuelEntry {
