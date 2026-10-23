@@ -26,6 +26,10 @@ services:
         value: adminmanager@gmail.com
       - key: FLEETFUEL_BOOTSTRAP_ADMIN_PASSWORD
         generateValue: true
+      - key: FLEETFUEL_BOOTSTRAP_ORGANIZATION
+        value: MediFuel Demo Fleet
+      - key: FLEETFUEL_BOOTSTRAP_CURRENCY
+        value: KES
       - key: PYTHONUNBUFFERED
         value: "1"
 

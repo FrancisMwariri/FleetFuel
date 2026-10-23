@@ -19,7 +19,17 @@ def bootstrap_admin() -> None:
 
     factory = get_session_factory()
     with factory.begin() as session:
-        if session.scalar(select(User.id).limit(1)) is not None:
+        existing_admin = session.scalar(select(User).where(User.email == email))
+        if existing_admin is not None:
+            if existing_admin.role == "ORG_ADMIN" and existing_admin.organization_id is not None:
+                print("Organization administrator already exists; bootstrap skipped")
+                return
+            if existing_admin.role != "SUPER_ADMIN" or existing_admin.organization_id is not None:
+                raise RuntimeError(
+                    "Bootstrap email belongs to an account that cannot be converted "
+                    "to an organization administrator"
+                )
+        elif session.scalar(select(User.id).limit(1)) is not None:
             raise RuntimeError("Bootstrap is only allowed when no users exist")
         organization = Organization(
             name=organization_name,
@@ -28,15 +38,20 @@ def bootstrap_admin() -> None:
         )
         session.add(organization)
         session.flush()
-        session.add(
-            User(
-                organization_id=organization.id,
-                email=email,
-                password_hash=hash_password(password),
-                full_name="Platform Administrator",
-                role="ORG_ADMIN",
+        if existing_admin is not None:
+            existing_admin.organization_id = organization.id
+            existing_admin.role = "ORG_ADMIN"
+            print("Platform administrator assigned to the bootstrap fleet")
+        else:
+            session.add(
+                User(
+                    organization_id=organization.id,
+                    email=email,
+                    password_hash=hash_password(password),
+                    full_name="Platform Administrator",
+                    role="ORG_ADMIN",
+                )
             )
-        )
 
 
 def bootstrap_super_admin() -> None:
