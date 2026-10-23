@@ -12,4 +12,5 @@ htmlcov/
 uploads/
 private_uploads/
 data/
+!mobile/lib/data/
 *.db
