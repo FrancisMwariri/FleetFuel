@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     app_name: str = "FleetFuel API"
     environment: Literal["development", "test", "production"] = "development"
     api_v1_prefix: str = "/api/v1"
+    enable_docs: bool = False
     cors_origins: list[str] = []
     database_url: str | None = None
     jwt_secret: str | None = None
@@ -41,7 +42,7 @@ class Settings(BaseSettings):
 
     @property
     def docs_enabled(self) -> bool:
-        return self.environment != "production"
+        return self.environment != "production" or self.enable_docs
 
     @model_validator(mode="after")
     def validate_production_configuration(self) -> "Settings":

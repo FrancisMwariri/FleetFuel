@@ -10,6 +10,8 @@ services:
     envVars:
       - key: FLEETFUEL_ENVIRONMENT
         value: production
+      - key: FLEETFUEL_ENABLE_DOCS
+        value: "true"
       - key: FLEETFUEL_DATABASE_URL
         fromDatabase:
           name: fleetfuel-db

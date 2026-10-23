@@ -9,7 +9,7 @@
 - Durable private attachment storage
 - SMTP settings and a client reset URL if password reset is enabled
 
-Production settings fail fast without the database URL and signing secret. OpenAPI is disabled in production. Keep credentials in the hosting platform's secret manager, not in source or container build arguments.
+Production settings fail fast without the database URL and signing secret. OpenAPI documentation is disabled in production by default and can be enabled explicitly with `FLEETFUEL_ENABLE_DOCS=true` when the API schema should be publicly available. Keep credentials in the hosting platform's secret manager, not in source or container build arguments.
 
 ## Release operations
 
