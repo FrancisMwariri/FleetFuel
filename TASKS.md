@@ -17,6 +17,15 @@
 
 Backend implementation slices are complete through reporting and audit APIs. The remaining gate is real PostgreSQL CI execution plus deployment-specific storage, proxy, and security review.
 
+## Mobile client (in progress)
+
+- [x] Build Flutter sign-in/registration, fleet dashboard, vehicle list, four-step fuel entry, reports, profile, and offline-sync foundation.
+- [x] Add fuel-entry detail views from dashboard/report activity, including authenticated attachment metadata and image previews.
+- [ ] Continue matching the remaining interactions and responsive details in `docs/MediFuel Improved UI.pdf`.
+- [ ] Validate Android/iOS behavior against a running API on target devices.
+
+Dashboard and report values describe recorded purchases and odometer observations. Do not present purchase litres divided by distance as measured fuel consumption; the backend explicitly treats these as distinct measurements.
+
 ## Verification and known limitations
 
 - Final local checks: `25 passed`, Ruff clean, and Alembic reports no metadata drift.

@@ -119,4 +119,4 @@ def register_from_invitation(
         resource_id=user.id,
     )
     session.commit()
-    return {"user_id": str(user.id), "status": "registered"}
+    return {"user_id": str(user.id), "email": user.email, "status": "registered"}

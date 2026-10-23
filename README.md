@@ -35,6 +35,10 @@ Password reset requires SMTP configuration via `FLEETFUEL_MAIL_HOST`, `FLEETFUEL
 
 Business routes use `/api/v1`; infrastructure routes are `/health` and database-dependent `/ready`. See [docs/api.md](docs/api.md), [docs/architecture.md](docs/architecture.md), and [docs/deployment.md](docs/deployment.md). Database changes use `alembic upgrade head`; never use `create_all` as a deployed migration strategy.
 
+## Mobile client
+
+The Flutter app in [mobile/](mobile/) provides fleet dashboards, vehicle views, fuel entry with receipt/odometer attachments, and offline synchronization. See [mobile/README.md](mobile/README.md) for setup, API address configuration, analysis, and test commands.
+
 HTTP behavior tests use isolated SQLite databases for fast deterministic coverage. They do not replace PostgreSQL integration tests. GitHub Actions is configured to start PostgreSQL, apply migrations, and run tests; this workflow was not run locally because Docker is unavailable in the current environment.
 
 Local attachments use private filesystem storage. Production requires durable private object storage or a persistent encrypted volume with backups; do not use an ephemeral filesystem. See [TASKS.md](TASKS.md) for implementation and verification status. This is an initial backend foundation, not a claim of full security or production certification.

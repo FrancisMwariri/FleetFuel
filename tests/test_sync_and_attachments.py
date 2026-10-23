@@ -127,3 +127,15 @@ def test_valid_attachment_retry_is_idempotent(
     assert replay.status_code == 200
     assert replay.headers["Idempotency-Replayed"] == "true"
     assert len(list(session.scalars(select(Attachment.id)))) == 1
+    listed = client.get(
+        f"/api/v1/fuel-records/{record.json()['id']}/attachments",
+        headers=headers,
+    )
+    assert listed.status_code == 200
+    metadata = listed.json()
+    assert len(metadata) == 1
+    assert metadata[0]["id"] == accepted.json()["id"]
+    assert metadata[0]["kind"] == "RECEIPT"
+    assert metadata[0]["content_type"] == "image/png"
+    assert metadata[0]["size_bytes"] == len(image_data.getvalue())
+    assert isinstance(metadata[0]["created_at"], str)

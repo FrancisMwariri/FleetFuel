@@ -1,23 +1,100 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "FleetFuel: tests",
-      "type": "shell",
-      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "pytest", "-q"],
-      "isBackground": false,
-      "problemMatcher": [],
-      "group": "test"
-    },
-    {
-      "label": "FleetFuel: lint",
-      "type": "shell",
-      "command": "${workspaceFolder}\\.venv\\Scripts\\ruff.exe",
-      "args": ["check", "."],
-      "isBackground": false,
-      "problemMatcher": [],
-      "group": "test"
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "FleetFuel: tests",
+			"type": "shell",
+			"command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "FleetFuel: lint",
+			"type": "shell",
+			"command": "${workspaceFolder}\\.venv\\Scripts\\ruff.exe",
+			"args": [
+				"check",
+				"."
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "FleetFuel mobile: inspect Flutter",
+			"type": "shell",
+			"command": "C:\\flutter\\bin\\flutter.bat",
+			"args": [
+				"doctor",
+				"-v"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "FleetFuel mobile: list Flutter devices",
+			"type": "shell",
+			"command": "C:\\flutter\\bin\\flutter.bat",
+			"args": [
+				"devices"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "FleetFuel mobile: create Flutter project",
+			"type": "shell",
+			"command": "C:\\flutter\\bin\\flutter.bat",
+			"args": [
+				"create",
+				"--project-name",
+				"medifuel_mobile",
+				"--org",
+				"com.medifuel",
+				"--platforms",
+				"android,ios,web",
+				"mobile"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "FleetFuel mobile: analyze data layer",
+			"type": "shell",
+			"command": "C:\\flutter\\bin\\flutter.bat",
+			"args": [
+				"analyze"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\mobile"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "FleetFuel mobile: first analysis pass",
+			"type": "shell",
+			"command": "C:\\flutter\\bin\\flutter.bat",
+			"args": [
+				"analyze",
+				"--no-pub"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\mobile"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
 }

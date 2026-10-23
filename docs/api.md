@@ -15,7 +15,7 @@ All business routes use `/api/v1`. Protected routes require `Authorization: Bear
 - `GET`, `POST /api/v1/fuel-records`; `GET /api/v1/fuel-records/{id}`
 - `POST`, `GET /api/v1/fuel-records/{id}/corrections`
 - `POST /api/v1/sync/fuel-records`
-- `POST /api/v1/fuel-records/{id}/attachments?kind=RECEIPT|ODOMETER`; attachment download by ID
+- `POST /api/v1/fuel-records/{id}/attachments?kind=RECEIPT|ODOMETER`; `GET` attachment metadata and download by ID
 - `GET /api/v1/analytics/summary`, `GET /api/v1/dashboard/summary`
 - `GET /api/v1/alerts`, `PATCH /api/v1/alerts/{id}`
 - `GET /api/v1/audit-logs`, `GET /api/v1/reports/fuel-records.csv`

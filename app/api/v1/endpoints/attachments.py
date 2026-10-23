@@ -15,6 +15,41 @@ from app.services.storage import resolve_storage_key, store_image
 router = APIRouter(prefix="/fuel-records/{record_id}/attachments", tags=["attachments"])
 
 
+@router.get("")
+def list_attachments(
+    record_id: UUID,
+    user: CurrentUser,
+    session: DatabaseSession,
+) -> list[dict[str, object]]:
+    organization = get_user_organization(user, session)
+    record = session.scalar(
+        select(FuelRecord).where(
+            FuelRecord.id == record_id,
+            FuelRecord.organization_id == organization.id,
+        )
+    )
+    if record is None or (user.role == "DRIVER" and record.submitted_by_id != user.id):
+        raise HTTPException(status_code=404, detail="Fuel record not found")
+    attachments = session.scalars(
+        select(Attachment)
+        .where(
+            Attachment.organization_id == organization.id,
+            Attachment.fuel_record_id == record.id,
+        )
+        .order_by(Attachment.created_at)
+    )
+    return [
+        {
+            "id": str(attachment.id),
+            "kind": attachment.kind,
+            "content_type": attachment.content_type,
+            "size_bytes": attachment.size_bytes,
+            "created_at": attachment.created_at.isoformat(),
+        }
+        for attachment in attachments
+    ]
+
+
 @router.post("", status_code=201)
 async def upload_attachment(
     record_id: UUID,
